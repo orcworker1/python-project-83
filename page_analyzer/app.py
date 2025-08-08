@@ -1,7 +1,8 @@
-from flask import render_template
+import os
+from flask import Flask, render_template
 
-from __init__ import app
-
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
 @app.route('/')

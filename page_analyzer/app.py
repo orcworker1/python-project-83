@@ -7,4 +7,4 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def index():
-    return "Welcome to Page Analyzer!"
+    return render_template('index.html/')

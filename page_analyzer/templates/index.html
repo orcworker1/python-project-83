@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="container d-flex justify-content-center mt-5">
+  <div class="bg-light p-5 shadow-sm rounded-3" style="max-width: 900px; width: 100%;">
+    <h1 class="display-4 text-center">Анализатор страниц</h1>
+    <p class="lead text-center">Бесплатно проверяйте сайты на SEO-пригодность</p>
+
+    <form method="post" class="row g-2 justify-content-center mt-4" action="#">
+      <div class="col-md-8">
+        <input type="text" name="url" class="form-control form-control-lg" placeholder="https://www.example.com" required>
+      </div>
+      <div class="col-auto">
+        <input type="submit" value="ПРОВЕРИТЬ" class="btn btn-primary btn-lg"></input>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

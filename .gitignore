@@ -36,3 +36,5 @@ coverage.xml
 Thumbs.db
 .ruff_cache
 demo.cast
+.python-version
+ main.py

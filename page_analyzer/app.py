@@ -25,7 +25,7 @@ def show_urls():
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id, name ,created_at FROM urls ORDER BY created_at DESC')
             result = curs.fetchall()
-    return render_template('urls_show.html', urls=result)
+    return render_template('urls.html', urls=result)
 
 
 @app.route('/urls' , methods=['post'])
@@ -48,7 +48,7 @@ def urls_add():
             url_id = curs.fetchone()['id']
             conn.commit()
             flash('страница успешно добавлена', 'success')
-            return redirect(url_for('show_urls', id=url_id))
+            return redirect(url_for('urls', id=url_id))
 
 
 #INSERT INTO table_name (column1, column2, ...)

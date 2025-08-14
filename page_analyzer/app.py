@@ -25,7 +25,7 @@ def show_urls():
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id, name ,created_at FROM urls ORDER BY created_at DESC')
             result = curs.fetchall()
-    return render_template(url_for('show_urls', url=result))
+    return render_template('urls_show.html', urls=result)
 
 
 @app.route('/urls' , methods=['post'])

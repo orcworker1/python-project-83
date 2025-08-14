@@ -2,7 +2,8 @@ import psycopg2, os , validators
 from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
-from datetime import date
+from datetime import datetime
+from urllib.parse import urlparse
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
@@ -20,7 +21,11 @@ def index():
 
 @app.route('/urls')
 def show_urls():
-    pass
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as curs:
+            curs.execute('SELECT id, name ,created_at FROM urls ORDER BY created_at DESC')
+            result = curs.fetchall()
+    return render_template(url_for('show_urls', url=result))
 
 
 @app.route('/urls' , methods=['post'])
@@ -36,14 +41,14 @@ def urls_add():
             result = curs.fetchone()
             if result:
                 flash('страница уже существует', 'info')
-                return  redirect(url_for(show_urls, id=result['id']))
-            curs.execute('INSERT INTO urls (name)'
-                         'VALUES (%s) RETURNING id;',
-                         (urls,))
+                return  redirect(url_for('show_urls', id=result['id']))
+            curs.execute('INSERT INTO urls (name, created_at)'
+                         'VALUES (%s,%s) RETURNING id;',
+                         (urls,datetime.now()))
             url_id = curs.fetchone()['id']
             conn.commit()
             flash('страница успешно добавлена', 'success')
-            return redirect(url_for('urls_show', id=url_id))
+            return redirect(url_for('show_urls', id=url_id))
 
 
 #INSERT INTO table_name (column1, column2, ...)

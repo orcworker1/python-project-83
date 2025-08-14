@@ -12,7 +12,7 @@
   </head>
 
   <body>
-    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark px-1">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark px-1">
       <div class="container-fluid">
         <a class="navbar-brand" href="{{url_for('index')}}">Анализатор страниц</a>
         <div class="collapse navbar-collapse">
@@ -25,10 +25,22 @@
       </div>
     </nav>
 
-    <div class="container mt-5 pt-4">
+      {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-danger fixed" role="alert">
+    {% for message in messages %}
+        {{message}}
+    {% endfor %}
+      </div>
+  {% endif %}
+{% endwith %}
       {% block content %}{% endblock %}
-    </div>
+
 
 
   </body>
 </html>
+
+
+<!---<div class="alert alert-danger" role="alert">
+  A simple danger alert—check it out!

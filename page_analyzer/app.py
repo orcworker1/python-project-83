@@ -33,7 +33,7 @@ def urls_add():
     urls = request.form.get('url')
     if not validators.url(urls):
         flash('Некорректный URL', 'DANGER')
-        return redirect(url_for('index')), 422
+        return render_template('index.html'), 422
 
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
@@ -41,7 +41,7 @@ def urls_add():
             result = curs.fetchone()
             if result:
                 flash('страница уже существует', 'info')
-                return  redirect(url_for('urls', id=result['id']))
+                return  redirect(url_for('show_url', id=result['id']))
             curs.execute('INSERT INTO urls (name, created_at)'
                          'VALUES (%s,%s) RETURNING id;',
                          (urls,datetime.now()))
@@ -52,15 +52,16 @@ def urls_add():
 
 
 @app.route('/urls/<int:id>')
-def show_urls(id):
+def show_url(id):
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute('SELECT id , name , created_at FROM urls WHERE id =%s', id)
-        url = curs.fetchone()
-        return  render_template('urls_show.html', show=url)
+            curs.execute('SELECT id , name , created_at FROM urls WHERE id =%s', (id,))
+            url = curs.fetchone()
+            return  render_template('urls_show.html', show=url)
 
 #INSERT INTO table_name (column1, column2, ...)
 #VALUES (value1, value2, ...);
+#class="alert alert-info"
 
 
 

@@ -20,7 +20,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/urls')
-def show_urls():
+def urls():
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id, name ,created_at FROM urls ORDER BY created_at DESC')
@@ -41,7 +41,7 @@ def urls_add():
             result = curs.fetchone()
             if result:
                 flash('страница уже существует', 'info')
-                return  redirect(url_for('show_urls', id=result['id']))
+                return  redirect(url_for('urls', id=result['id']))
             curs.execute('INSERT INTO urls (name, created_at)'
                          'VALUES (%s,%s) RETURNING id;',
                          (urls,datetime.now()))
@@ -50,6 +50,14 @@ def urls_add():
             flash('страница успешно добавлена', 'success')
             return redirect(url_for('urls', id=url_id))
 
+
+@app.route('/urls/<int:id>')
+def show_urls(id):
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as curs:
+            curs.execute('SELECT id , name , created_at FROM urls WHERE id =%s', id)
+        url = curs.fetchone()
+        return  render_template('urls_show.html', show=url)
 
 #INSERT INTO table_name (column1, column2, ...)
 #VALUES (value1, value2, ...);

@@ -23,7 +23,24 @@ def index():
 def urls():
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute('SELECT id, name ,created_at FROM urls ORDER BY created_at DESC')
+            curs.execute('''
+    SELECT 
+        u.id,
+        u.name,
+        u.created_at,
+        latest.created_at as last_check,
+        latest.status_code as last_check_status
+    FROM urls u
+    LEFT JOIN (
+        SELECT DISTINCT ON (url_id)
+            url_id,
+            status_code,
+            created_at
+        FROM url_checks
+        ORDER BY url_id, created_at DESC
+    ) latest ON u.id = latest.url_id
+    ORDER BY u.created_at DESC;
+''')
             result = curs.fetchall()
     return render_template('urls.html', urls=result)
 
@@ -57,7 +74,26 @@ def show_url(id):
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id , name , created_at FROM urls WHERE id =%s', (id,))
             url = curs.fetchone()
-            return  render_template('urls_show.html', show=url)
+            curs.execute('SELECT id, url_id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id =%s', (id,))
+            check = curs.fetchone()
+    return  render_template('urls_show.html', show=url, check=check)
+
+
+@app.route('/urls/<int:id>/checks', methods=['post'])
+def add_check(id):
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as curs:
+            curs.execute('SELECT id FROM urls WHERE id =%s', (id,))
+            check_id = curs.fetchone()
+            if not check_id:
+                flash('Сайт не найден', 'danger')
+                return redirect(url_for('urls'))
+            curs.execute('INSEART INTO url_check (url_id, created_at) VALUE (%s,%s)', (id, datetime.now()))
+            conn.commit()
+            flash('Cтраница успешно проверенна', 'success')
+    return redirect(url_for('urls_show', id=id))
+
+
 
 #INSERT INTO table_name (column1, column2, ...)
 #VALUES (value1, value2, ...);

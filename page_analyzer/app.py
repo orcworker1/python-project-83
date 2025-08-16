@@ -74,8 +74,8 @@ def show_url(id):
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id , name , created_at FROM urls WHERE id =%s', (id,))
             url = curs.fetchone()
-            curs.execute('SELECT id, url_id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id =%s', (id,))
-            check = curs.fetchone()
+            curs.execute('SELECT id, url_id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id =%s ORDER BY created_at DESC', (id,))
+            check = curs.fetchall()
     return  render_template('urls_show.html', show=url, check=check)
 
 
@@ -88,10 +88,10 @@ def add_check(id):
             if not check_id:
                 flash('Сайт не найден', 'danger')
                 return redirect(url_for('urls'))
-            curs.execute('INSEART INTO url_check (url_id, created_at) VALUE (%s,%s)', (id, datetime.now()))
+            curs.execute('INSERT INTO url_checks (url_id, created_at) VALUES (%s,%s)', (id, datetime.now()))
             conn.commit()
             flash('Cтраница успешно проверенна', 'success')
-    return redirect(url_for('urls_show', id=id))
+    return redirect(url_for('show_url', id=id))
 
 
 

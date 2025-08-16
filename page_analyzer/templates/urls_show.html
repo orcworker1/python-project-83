@@ -21,7 +21,7 @@
 
 <div class="container">
 <h2 class="mt-5 mb-3">Проверки</h2>
-    <form method="post" action="{{ url_for('add_check', id=url.id) }}">
+    <form method="post" action="{{ url_for('add_check', id=show.id) }}">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
     </form>
     <table class="table table-bordered table-hover mt-2" data-test="checks">
@@ -38,12 +38,12 @@
       <tbod>
 
     <tr>
+        <td>{{ show.id }}</td>
         <td></td>
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
-        <td></td>
+        <td>{{ show.created_at }}</td>
     </tr>
 </div>
 

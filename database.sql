@@ -11,7 +11,7 @@ CREATE TABLE url_checks (
     h1 TEXT,
     title TEXT ,
     description TEXT ,
-    created_at TIMESTAMP
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 

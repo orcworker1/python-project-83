@@ -1,9 +1,13 @@
-import psycopg2, os , validators
+import psycopg2, os , validators , requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+from functions import get_request
 from urllib.parse import urlparse
+
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 

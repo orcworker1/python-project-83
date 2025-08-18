@@ -70,7 +70,7 @@ def urls_add():
             url_id = curs.fetchone()['id']
             conn.commit()
             flash('страница успешно добавлена', 'success')
-            return redirect(url_for('urls', id=url_id))
+            return redirect(url_for('show_url', id=url_id))
 
 
 @app.route('/urls/<int:id>')

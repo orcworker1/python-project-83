@@ -36,15 +36,20 @@
       </tr>
     </thead>
       <tbod>
-
+    {% if cheks %}
+          {% for check in checks %}
     <tr>
-        <td>{{ show.id }}</td>
+        <td>{{ check.id }}</td>
+        <td>{{ check.status_code }}</td>
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
-        <td>{{ show.created_at }}</td>
+        <td>{{ check.created_at }}</td>
     </tr>
+          {% endfor %}
+        {% endif %}
+      </tbod>
+
 </div>
 
 

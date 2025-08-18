@@ -1,9 +1,11 @@
+from asyncio.sslproto import add_flowcontrol_defaults
+from http.client import responses
+
 import psycopg2, os , validators , requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
-from functions import get_request
 from urllib.parse import urlparse
 
 
@@ -80,20 +82,39 @@ def show_url(id):
             url = curs.fetchone()
             curs.execute('SELECT id, url_id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id =%s ORDER BY created_at DESC', (id,))
             check = curs.fetchall()
-    return  render_template('urls_show.html', show=url, check=check)
+    return  render_template('urls_show.html', show=url, checks=check)
 
 
 @app.route('/urls/<int:id>/checks', methods=['post'])
 def add_check(id):
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute('SELECT id FROM urls WHERE id =%s', (id,))
-            check_id = curs.fetchone()
-            if not check_id:
+            curs.execute('SELECT id, name FROM urls WHERE id =%s', (id,))
+            url_data = curs.fetchone()
+            if not url_data:
                 flash('Сайт не найден', 'danger')
                 return redirect(url_for('urls'))
-            curs.execute('INSERT INTO url_checks (url_id, created_at) VALUES (%s,%s)', (id, datetime.now()))
-            conn.commit()
+            try:
+                status_code = requests.get(url_data['name'])
+                status_code.raise_for_status()
+            except requests.RequestException:
+                flash("Произошла ошибка при проверке", "danger")
+                return redirect(url_for("urls_show", id=id))
+            h1 = None
+            title = None
+            description = None
+            with get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO url_checks (url_id, status_code, h1,
+                                                title, description, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        """,
+                        (id, status_code.status_code, h1, title, description,
+                         datetime.now())
+                    )
+                    conn.commit()
             flash('Cтраница успешно проверенна', 'success')
     return redirect(url_for('show_url', id=id))
 
@@ -102,6 +123,7 @@ def add_check(id):
 #INSERT INTO table_name (column1, column2, ...)
 #VALUES (value1, value2, ...);
 #class="alert alert-info"
+#psql -d page_analyzer
 
 
 

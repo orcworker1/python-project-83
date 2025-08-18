@@ -3,9 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
-from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-from page_analyzer.functions import parser_h1, parser_title, parser_description
+from page_analyzer.parse import parser_h1, parser_title, parser_description
 
 
 

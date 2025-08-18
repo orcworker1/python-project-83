@@ -18,7 +18,7 @@
         <td>
             <a href="{{ url_for('show_url', id=url.id) }}">{{url.name}}</a>
         </td>
-        <td>{{ url.last_check or '' }}</td>
+        <td>{{ url.last_check.strftime('%Y-%m-%d') if url.last_check else '' }}</td>
         <td>{{ url.last_check_status or '' }}</td>
     </tr>
     </tbody>

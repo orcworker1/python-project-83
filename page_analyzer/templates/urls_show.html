@@ -35,20 +35,20 @@
         <th>Дата создания</th>
       </tr>
     </thead>
-      <tbod>
-    {% if cheks %}
+      <tbody>
+
           {% for check in checks %}
     <tr>
         <td>{{ check.id }}</td>
-        <td>{{ check.status_code }}</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>{{ check.created_at }}</td>
+          <td>{{ check.status_code or '' }}</td>
+          <td>{{ check.h1 or '' }}</td>
+          <td>{{ check.title or '' }}</td>
+          <td>{{ check.description or '' }}</td>
+          <td>{{ check.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
     </tr>
           {% endfor %}
-        {% endif %}
-      </tbod>
+
+      </tbody>
 
 </div>
 

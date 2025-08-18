@@ -1,20 +1,13 @@
-import psycopg2
-import os
-from dotenv import load_dotenv
-from psycopg2.extras import RealDictCursor
-
-load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
+from bs4 import BeautifulSoup
 
 
-def tes_queries():
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute('SELECT id, name FROM urls WHERE id =2')
-    name = cur.fetchone()['name']
-    print(name)
-    for row in cur.fetchall():
-        print(f"ID: {row['id']}, Name: {row['name']}, Created: {row['created_at']}")
+def parser(html):
+    soup = BeautifulSoup(html, "html.parser")
+    meta_desc = soup.find("meta", attrs={"name": "description"})
+    description = meta_desc["content"] if meta_desc else "Нет описания"
+    h1 = soup.h1.string if soup.h1 else ""
+    title = soup.title.string if soup.title else ""
+    return h1 , description, title
 
-tes_queries()
+
 

@@ -1,12 +1,11 @@
-from asyncio.sslproto import add_flowcontrol_defaults
-from http.client import responses
-
 import psycopg2, os , validators , requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from page_analyzer.functions import parser_h1, parser_title, parser_description
 
 
 
@@ -91,6 +90,7 @@ def add_check(id):
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute('SELECT id, name FROM urls WHERE id =%s', (id,))
             url_data = curs.fetchone()
+            url_name = requests.get(url_data['name'])
             if not url_data:
                 flash('Сайт не найден', 'danger')
                 return redirect(url_for('urls'))
@@ -99,10 +99,10 @@ def add_check(id):
                 status_code.raise_for_status()
             except requests.RequestException:
                 flash("Произошла ошибка при проверке", "danger")
-                return redirect(url_for("urls_show", id=id))
-            h1 = None
-            title = None
-            description = None
+                return redirect(url_for("show_url", id=id))
+            h1 = parser_h1(url_name)
+            title = parser_title(url_name)
+            description = parser_description(url_name)
             with get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(

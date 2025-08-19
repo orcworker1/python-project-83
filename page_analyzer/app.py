@@ -1,4 +1,7 @@
-import psycopg2, os , validators , requests
+import psycopg2
+import os
+import validators
+import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor

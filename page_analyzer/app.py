@@ -15,20 +15,22 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-
-
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 
 def get_connection():
     return psycopg2.connect(DATABASE_URL)
+
 
 def normalize_url(url):
     normalize = urlparse(url)
     return f"{normalize.scheme}://{normalize.netloc}"
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/urls")
 def urls():
@@ -56,7 +58,7 @@ def urls():
     return render_template("urls.html", urls=result)
 
 
-@app.route("/urls" , methods=["post"])
+@app.route("/urls", methods=["post"])
 def urls_add():
     urls = request.form.get("url")
     if not validators.url(urls):
@@ -65,14 +67,15 @@ def urls_add():
     normalized_url = normalize_url(urls)
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute("SELECT id from urls WHERE name =%s;",(normalized_url,))
+            curs.execute("SELECT id from urls WHERE name =%s;"
+                         , (normalized_url,))
             result = curs.fetchone()
             if result:
                 flash("Страница уже существует", "info")
-                return  redirect(url_for("show_url", id=result["id"]))
+                return redirect(url_for("show_url", id=result["id"]))
             curs.execute("INSERT INTO urls (name, created_at)"
                          "VALUES (%s,%s) RETURNING id;",
-                         (normalized_url,datetime.now()))
+                         (normalized_url, datetime.now()))
             url_id = curs.fetchone()["id"]
             conn.commit()
             flash("Страница успешно добавлена", "success")
@@ -83,11 +86,16 @@ def urls_add():
 def show_url(id):
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute("SELECT id , name , created_at FROM urls WHERE id =%s", (id,))
+            curs.execute("SELECT id , name , created_at FROM urls WHERE id =%s",
+                         (id,))
             url = curs.fetchone()
-            curs.execute("SELECT id, url_id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id =%s ORDER BY created_at DESC", (id,))
+            curs.execute("SELECT id, url_id, status_code, h1, title,"
+                         "description,"
+                         "created_at FROM url_checks WHERE "
+                         "url_id =%s ORDER BY created_at DESC",
+                         (id,))
             check = curs.fetchall()
-    return  render_template("urls_show.html", show=url, checks=check)
+    return render_template("urls_show.html", show=url, checks=check)
 
 
 @app.route("/urls/<int:id>/checks", methods=["post"])
@@ -104,24 +112,26 @@ def add_check(id):
                 status_code = requests.get(url_data["name"])
                 status_code.raise_for_status()
             except requests.RequestException:
-                flash("Произошла ошибка при проверке", "danger")
+                flash("Произошла ошибка при проверке",
+                      "danger")
                 return redirect(url_for("show_url", id=id))
             h1 = parser_h1(url_name)
             title = parser_title(url_name)
             description = parser_description(url_name)
             with conn.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        INSERT INTO url_checks (url_id, status_code, h1,
-                                                title, description, created_at)
+                cursor.execute(
+                """
+                INSERT INTO url_checks (url_id, status_code, h1,
+                                       title, 
+                                       description, 
+                                        created_at)
                         VALUES (%s, %s, %s, %s, %s, %s)
                         """,
-                        (id, status_code.status_code, h1, title, description,
-                         datetime.now()),
-                    )
-                    conn.commit()
+                (id, status_code.status_code, h1, title, description,
+                datetime.now()),
+                )
+                conn.commit()
             flash("Страница успешно проверена", "success")
-
     return redirect(url_for("show_url", id=id))
 
 

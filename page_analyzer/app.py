@@ -67,15 +67,19 @@ def urls_add():
     normalized_url = normalize_url(urls)
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute("SELECT id from urls WHERE name =%s;"
-                         , (normalized_url,))
+            curs.execute(
+                "SELECT id from urls WHERE name =%s;",
+                (normalized_url,)
+            )
             result = curs.fetchone()
             if result:
                 flash("Страница уже существует", "info")
                 return redirect(url_for("show_url", id=result["id"]))
-            curs.execute("INSERT INTO urls (name, created_at)"
-                         "VALUES (%s,%s) RETURNING id;",
-                         (normalized_url, datetime.now()))
+            curs.execute(
+                "INSERT INTO urls (name, created_at)"
+                "VALUES (%s,%s) RETURNING id;",
+                (normalized_url, datetime.now())
+            )
             url_id = curs.fetchone()["id"]
             conn.commit()
             flash("Страница успешно добавлена", "success")
@@ -86,14 +90,18 @@ def urls_add():
 def show_url(id):
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute("SELECT id , name , created_at FROM urls WHERE id =%s",
-                         (id,))
+            curs.execute(
+                "SELECT id , name , created_at FROM urls WHERE id =%s",
+                (id,)
+            )
             url = curs.fetchone()
-            curs.execute("SELECT id, url_id, status_code, h1, title,"
-                         "description,"
-                         "created_at FROM url_checks WHERE "
-                         "url_id =%s ORDER BY created_at DESC",
-                         (id,))
+            curs.execute(
+                "SELECT id, url_id, status_code, h1, title,"
+                "description,"
+                "created_at FROM url_checks WHERE "
+                "url_id =%s ORDER BY created_at DESC",
+                (id,)
+            )
             check = curs.fetchall()
     return render_template("urls_show.html", show=url, checks=check)
 
@@ -120,24 +128,16 @@ def add_check(id):
             description = parser_description(url_name)
             with conn.cursor() as cursor:
                 cursor.execute(
-                """
-                INSERT INTO url_checks (url_id, status_code, h1,
-                                       title, 
-                                       description, 
-                                        created_at)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        """,
-                (id, status_code.status_code, h1, title, description,
-                datetime.now()),
+                    """
+                    INSERT INTO url_checks (url_id, status_code, h1,
+                                           title, 
+                                           description, 
+                                            created_at)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                            """,
+                    (id, status_code.status_code, h1, title, description,
+                     datetime.now()),
                 )
                 conn.commit()
             flash("Страница успешно проверена", "success")
     return redirect(url_for("show_url", id=id))
-
-
-
-
-
-
-
-

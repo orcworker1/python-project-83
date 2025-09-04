@@ -16,10 +16,7 @@ def parser_title(html):
 def parser_description(html):
     soup = BeautifulSoup(html.text, "html.parser")
     meta_desc = soup.find("meta", attrs={"name": "description"})
-    description = meta_desc["content"] if meta_desc else "Нет описания"
+    description = meta_desc["content"] if meta_desc else ""
     return description
-
-
-
 
 

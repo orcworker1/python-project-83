@@ -70,7 +70,7 @@ def urls_add():
                 return  redirect(url_for('show_url', id=result['id']))
             curs.execute('INSERT INTO urls (name, created_at)'
                          'VALUES (%s,%s) RETURNING id;',
-                         (urls,datetime.now()))
+                         (normalized_url,datetime.now()))
             url_id = curs.fetchone()['id']
             conn.commit()
             flash('Страница успешно добавлена', 'success')

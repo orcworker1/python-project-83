@@ -118,7 +118,8 @@ def add_check(id):
                          datetime.now())
                     )
                     conn.commit()
-            flash('Cтраница успешно проверена', 'success')
+            flash('Страница успешно проверена', 'success')
+
     return redirect(url_for('show_url', id=id))
 
 

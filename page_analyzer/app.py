@@ -7,7 +7,7 @@ from flask import Flask, render_template, request , flash, redirect , url_for
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from page_analyzer.parse import parser_h1, parser_title, parser_description
-
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -20,6 +20,9 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 def get_connection():
     return psycopg2.connect(DATABASE_URL)
 
+def normalize_url(url):
+    normalize = urlparse(url)
+    return f'{normalize.scheme}://{normalize.netloc}'
 
 @app.route('/')
 def index():
@@ -57,10 +60,10 @@ def urls_add():
     if not validators.url(urls):
         flash('Некорректный URL', 'danger')
         return render_template('index.html'), 422
-
+    normalized_url = normalize_url(urls)
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
-            curs.execute('SELECT id from urls WHERE name =%s;',(urls,))
+            curs.execute('SELECT id from urls WHERE name =%s;',(normalized_url,))
             result = curs.fetchone()
             if result:
                 flash('Страница уже существует', 'info')
@@ -115,7 +118,7 @@ def add_check(id):
                          datetime.now())
                     )
                     conn.commit()
-            flash('Cтраница успешно проверенна', 'success')
+            flash('Cтраница успешно проверена', 'success')
     return redirect(url_for('show_url', id=id))
 
 

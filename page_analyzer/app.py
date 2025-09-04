@@ -63,14 +63,14 @@ def urls_add():
             curs.execute('SELECT id from urls WHERE name =%s;',(urls,))
             result = curs.fetchone()
             if result:
-                flash('страница уже существует', 'info')
+                flash('Страница уже существует', 'info')
                 return  redirect(url_for('show_url', id=result['id']))
             curs.execute('INSERT INTO urls (name, created_at)'
                          'VALUES (%s,%s) RETURNING id;',
                          (urls,datetime.now()))
             url_id = curs.fetchone()['id']
             conn.commit()
-            flash('страница успешно добавлена', 'success')
+            flash('Страница успешно добавлена', 'success')
             return redirect(url_for('show_url', id=url_id))
 
 

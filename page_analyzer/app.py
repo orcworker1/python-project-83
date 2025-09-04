@@ -9,11 +9,11 @@ from datetime import datetime
 from page_analyzer.parse import parser_h1, parser_title, parser_description
 
 
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 

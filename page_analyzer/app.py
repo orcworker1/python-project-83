@@ -55,7 +55,7 @@ def urls():
 def urls_add():
     urls = request.form.get('url')
     if not validators.url(urls):
-        flash('Некорректный URL', 'DANGER')
+        flash('Некорректный URL', 'danger')
         return render_template('index.html'), 422
 
     with get_connection() as conn:
@@ -104,8 +104,7 @@ def add_check(id):
             h1 = parser_h1(url_name)
             title = parser_title(url_name)
             description = parser_description(url_name)
-            with get_connection() as conn:
-                with conn.cursor() as cursor:
+            with conn.cursor() as cursor:
                     cursor.execute(
                         """
                         INSERT INTO url_checks (url_id, status_code, h1,

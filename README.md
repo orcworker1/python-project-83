@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Analyzer - README</title>
 </head>
 <p>
         <a href="https://github.com/orcworker1/python-project-83/actions">

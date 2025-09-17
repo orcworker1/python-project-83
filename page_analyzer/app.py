@@ -1,4 +1,5 @@
 import os
+from asyncio import timeout
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -8,8 +9,9 @@ import validators
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from psycopg2.extras import RealDictCursor
+from requests.exceptions import RequestException, Timeout
 
-from page_analyzer.parse import parser_description, parser_h1, parser_title
+from page_analyzer.parse import parser
 
 load_dotenv()
 
@@ -23,7 +25,9 @@ def get_connection():
 
 
 def normalize_url(url):
-    normalize = urlparse(url)
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+    normalize = urlparse(url.lower())
     return f"{normalize.scheme}://{normalize.netloc}"
 
 
@@ -112,30 +116,32 @@ def add_check(id):
         with conn.cursor(cursor_factory=RealDictCursor) as curs:
             curs.execute("SELECT id, name FROM urls WHERE id =%s", (id,))
             url_data = curs.fetchone()
-            url_name = requests.get(url_data["name"])
             if not url_data:
                 flash("Сайт не найден", "danger")
                 return redirect(url_for("urls"))
             try:
-                status_code = requests.get(url_data["name"])
-                status_code.raise_for_status()
+                url_name = requests.get(url_data["name"], timeout=(10, 30))
+                response = url_name.raise_for_status()
+            except Timeout:
+                flash('Превышено время ожидания ответа от сайта', 'danger')
+                return redirect(url_for('show_url',id=id))
+
             except requests.RequestException:
                 flash("Произошла ошибка при проверке",
                       "danger")
                 return redirect(url_for("show_url", id=id))
-            h1 = parser_h1(url_name)
-            title = parser_title(url_name)
-            description = parser_description(url_name)
+
+            h1 , title , description = parser(url_name)
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO url_checks (url_id, status_code, h1,
+                    INSERT INTO url_checks (url_id, response, h1,
                                            title, 
                                            description, 
                                             created_at)
                             VALUES (%s, %s, %s, %s, %s, %s)
                             """,
-                    (id, status_code.status_code, h1, title, description,
+                    (id, response.status_code, h1, title, description,
                      datetime.now()),
                 )
                 conn.commit()

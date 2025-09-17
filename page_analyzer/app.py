@@ -1,5 +1,4 @@
 import os
-from asyncio import timeout
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -9,7 +8,7 @@ import validators
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from psycopg2.extras import RealDictCursor
-from requests.exceptions import RequestException, Timeout
+from requests.exceptions import Timeout
 
 from page_analyzer.parse import parser
 
@@ -120,28 +119,30 @@ def add_check(id):
                 flash("Сайт не найден", "danger")
                 return redirect(url_for("urls"))
             try:
-                url_name = requests.get(url_data["name"], timeout=(10, 30))
-                response = url_name.raise_for_status()
+                response = requests.get(url_data["name"], timeout=(10, 30))
+                response.raise_for_status()
+                status_code = response.status_code
+
             except Timeout:
                 flash('Превышено время ожидания ответа от сайта', 'danger')
-                return redirect(url_for('show_url',id=id))
+                return redirect(url_for('show_url', id=id))
 
             except requests.RequestException:
                 flash("Произошла ошибка при проверке",
                       "danger")
                 return redirect(url_for("show_url", id=id))
 
-            h1 , title , description = parser(url_name)
+            h1, title, description = parser(response)
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO url_checks (url_id, response, h1,
+                    INSERT INTO url_checks (url_id, status_code, h1,
                                            title, 
                                            description, 
                                             created_at)
                             VALUES (%s, %s, %s, %s, %s, %s)
                             """,
-                    (id, response.status_code, h1, title, description,
+                    (id, status_code, h1, title, description,
                      datetime.now()),
                 )
                 conn.commit()

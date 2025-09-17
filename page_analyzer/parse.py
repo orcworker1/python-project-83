@@ -7,6 +7,6 @@ def parser(html):
     title = soup.title.string if soup.title else ""
     meta_desc = soup.find("meta", attrs={"name": "description"})
     description = meta_desc["content"] if meta_desc else ""
-    return h1 , title, description
+    return h1, title, description
 
 
